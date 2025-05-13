@@ -32,6 +32,7 @@ def create_app():
         firebase = FirebaseConfig()
         firebase.initialize_app()
 
+
     # Register all Blueprints
     app.register_blueprint(task_routes, url_prefix='/api/tasks')
     app.register_blueprint(day_routes, url_prefix='/api/day')

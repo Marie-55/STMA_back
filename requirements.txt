@@ -8,3 +8,4 @@ Flask-Login>=0.6.2
 requests>=2.31.0
 flask_jwt_extended
 gunicorn
+flask_cors
