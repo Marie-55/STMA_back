@@ -24,3 +24,29 @@ def create_week_schedule(start_date, end_date, day_schedules):
         db.session.add(week_schedule)
         db.session.commit()
         return week_schedule
+    
+
+# def get_week_schedule(start_date, end_date):
+#     db_type = get_active_db_type()
+
+#     if db_type == "firebase":
+#         week_schedule_model = DatabaseFactory.get_week_schedule_model()
+#         return week_schedule_model.create(
+#             start_date=start_date,
+#             end_date=end_date,
+#             day_schedules=day_schedules
+#         )
+#     else:
+#         week_schedule = WeekSchedule(
+#             start_date=start_date,
+#             end_date=end_date,
+#             day_schedules=day_schedules
+#         )
+#         db.session.add(week_schedule)
+#         db.session.commit()
+#         return week_schedule
+    
+
+
+    
+

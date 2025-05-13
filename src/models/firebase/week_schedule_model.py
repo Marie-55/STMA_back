@@ -22,7 +22,7 @@ class FirebaseWeekSchedule:
     def get_by_start_date(self, start_date):
         date_str = start_date.strftime("%Y-%m-%d") if isinstance(start_date, datetime) else start_date
         return self.repo.get_document(self.collection, date_str)
-        
+      
     def update(self, start_date, data):
         date_str = start_date.strftime("%Y-%m-%d") if isinstance(start_date, datetime) else start_date
         return self.repo.update_document(self.collection, date_str, data)
