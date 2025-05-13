@@ -1,0 +1,9 @@
+# install using command: pip install -r requirements.txt
+
+# Core Application Dependencies
+firebase-admin==6.4.0
+Flask>=2.3.0
+Flask-SQLAlchemy>=3.0.3
+Flask-Login>=0.6.2
+requests>=2.31.0
+flask_jwt_extended

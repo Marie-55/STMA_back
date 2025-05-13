@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "smart-time-management-a",
+  "private_key_id": "05c00ab890eaf2d68a08bb314605c4c89d485dbf",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC3CNd2jgQPbHud\nwOk2lbTgEdez82U/Y5iU0VZZX+ap1lYwwDY8UfqxFShAIYdNAQSc+2KNnfK1nwzn\neSUrxtD+Yyli/Lxtoglo19JXZE6TSGGMWhm1SF+XVaCiqqybKejKDhk9LsMjMBq2\nu9yKesdPshb+H2XB6GDfEm6cbLkEOWEhiq1qXn2PIzsXWiU4mMrY3B8eHtkEj87M\n/21ec7RdRVHZhKBGD448Ur3nOQBDWh3R4Yc42jicXzd4xXh+hjkDCb3bUJn6ElcK\nXQSLCHJ79fLXxP5G62vEPhabSpoI6muv7I9E56HnqDteOh5PQTRqayvRcuOnp5rw\n3fiaDixjAgMBAAECggEAAauZWbZOeI6yfRFyiw+xru8/gY5Je+jxgnoM5tPCoscx\nNlrsNDcRThJeZXY8wmgYy8Zul4Y6FRM4unqwM9cAPk3y1/f92htMukcH+rvHssK8\nNuMKeIFFnUqfYv3uyqJZzS5ZFJaf9+5i3oJUx1DYhQdhtssTZTsxcubT0k/cfz1C\n3GQjKFdFmg0JNRbElYZitp8dDvoK4kx3CMZ+jGEe+r1Xm2Kga/z3gRo+8ULxBkFe\nQJKvJR6QEkWPV2QZUl2hwUtr1KR989z+Tym3ZCDpxr5LaQO356dfb6c0KQcFLSR+\niAXMrM4ZEmdEAaaWRz+XaCAWOV54h3YO/tCNWcsLpQKBgQD+6LdHtvMxjfwNsYBp\nfu3dwXUe6FMqqltMJobod9qKLqJy9pXPBcjsIv1dHjauffzbbx8BCh0fheB9KbmG\n9KD7GD9vtzPacZlZ5x6JlRNSwXAxtr23DvkOPorfZleCpvrbyjgcDtpTtObxme2u\nwAzpq30tc7lNTQzm5W01rqaITwKBgQC30WDeVoRoiiHX7Ryhh5Z5gSs/A2BHNxPX\nmGn9LvmxCphDnHFMLxj/XyAD34ILMrNc0pCTPDtCwpUa/6QRnd8a3z6NfNQLO1ft\nNEMqaPc033u71keMZBiJ3axC/qwrHOU55Lf/fu2tT332MGvFc/Iz1WYl3Q9oX7tz\nNC1O5JhBrQKBgQDGFjHXGOSDbcKhIX6YfHp8CQnqqr92OEwaMRZFMF4zY2n5zIU+\nC1DHr6kT45a6ok0MeJ2vQRzAkliQ6wuxRAiVF5K0TbmN1xlEM8YXRDFv7cIx38At\nsQT5fMCOOglnDjuC8PIJW8FtqvaMaQG6+qMOMqVj3LnyyB1ukHr9bGsdIQKBgGrv\nhbkS/+iJI3MoX9WguWtqN6xq3GHRqttrsY02/M9/6GC87DRz2ckGn+tg5Zh6IFpJ\nrQ3apmcKKBAS1HHjM93ALfXFvt3h4h7+nmxXsCi0Mplt6SXFPXlG2mYHHkXeg4QQ\niPI79y0x54eHV8sAztBUvx4b4lDIEJbOreUNm33pAoGBAMPbiAShd2rZLb/h8pTT\no1tK3qoc6eLgtB0etvTqukEPMEnwgz3w7QDf2CvOfIt9tSDT1731msBeX38mZOp5\nO5lBFM1oqkPMzyNQLXHSXhgYs5C2fWCfbtfG0ltpJfjzpN13zHDMV0/fbRc0cstZ\nd0dk96ynI59dNoU41dxs+dNH\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@smart-time-management-a.iam.gserviceaccount.com",
+  "client_id": "106088010551494372300",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40smart-time-management-a.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
