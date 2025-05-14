@@ -23,7 +23,7 @@ def get_database():
         initialize_app(cred, FIREBASE_CONFIG)
         return firestore.client()  # Firestore DB
     else:
-        return create_engine(LOCAL_DB)  # SQLite DB
+        return LOCAL_DB  # SQLite DB
     
 def create_app():
     app = Flask(__name__)
