@@ -3,7 +3,7 @@ from  src.models import  User, Task, Session, DaySchedule, WeekSchedule, Stats, 
 from src.utils.db_utils import get_active_db_type
 from src.database import db
 from werkzeug.security import generate_password_hash
-from stats_controller import create_user_stats
+from src.controllers.stats_controller import create_user_stats
 
 def create_user(email, password):
     db_type = get_active_db_type()
