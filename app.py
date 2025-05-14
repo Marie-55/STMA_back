@@ -12,6 +12,8 @@ from src.config.firebase_config import FirebaseConfig
 #  added by bilal 
 from flask_cors import CORS
 
+from utils.db_utils_m import REMOTE_DB
+
 
 def create_app():
     app = Flask(__name__)
@@ -19,16 +21,19 @@ def create_app():
     
     CORS(app, origins="*", supports_credentials=True)
 
+    if USE_FIREBASE:
+        app.config["SQLALCHEMY_DATABASE_URI"] = REMOTE_DB
+    else:
+        app.config["SQLALCHEMY_DATABASE_URI"] = LOCAL_DB
 
-    # Configure SQLAlchemy database for local storage
-    app.config["SQLALCHEMY_DATABASE_URI"] = LOCAL_DB
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize SQLAlchemy with app
     db.init_app(app)
 
-    # Initialize Firebase if enabled
+    # suspicious
     if USE_FIREBASE:
+    # Initialize Firebase if enabled
         firebase = FirebaseConfig()
         firebase.initialize_app()
 
