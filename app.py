@@ -12,7 +12,7 @@ from src.config.firebase_config import FirebaseConfig
 #  added by bilal 
 from flask_cors import CORS
 from firebase_admin import credentials, firestore, initialize_app
-from utils.db_utils_m import REMOTE_DB, FIREBASE_CREDENTIALS_PATH,FIREBASE_CONFIG
+from utils.db_utils_m import FIREBASE_CREDENTIALS_PATH,FIREBASE_CONFIG
 from sqlalchemy import create_engine
 
 
