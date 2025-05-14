@@ -21,8 +21,9 @@ class DatabaseCreator:
         """Create the User table"""
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS User (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT PRIMARY KEY,
-            password TEXT NOT NULL,
+            password4 TEXT NOT NULL,
             stats_id INTEGER,
             FOREIGN KEY (stats_id) REFERENCES Stats(id)
         )
@@ -80,8 +81,8 @@ class DatabaseCreator:
             completed_tasks INTEGER DEFAULT 0,
             productivity_score REAL DEFAULT 0,
             average_task_duration REAL DEFAULT 0,
-            user_email TEXT UNIQUE,
-            FOREIGN KEY (user_email) REFERENCES User(email)
+            user_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES User(id)
         )
         ''')
     

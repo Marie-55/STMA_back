@@ -3,17 +3,25 @@ from  src.models import  User, Task, Session, DaySchedule, WeekSchedule, Stats, 
 from src.utils.db_utils import get_active_db_type
 from src.database import db
 from werkzeug.security import generate_password_hash
+from stats_controller import create_user_stats
 
 def create_user(email, password):
     db_type = get_active_db_type()
     
     if db_type == "firebase":
         user_model = DatabaseFactory.get_user_model()
-        return user_model.create(email=email, password=password)
+        user = user_model.create(email=email, password=password)
+        # Create stats for the new user
+        stats = create_user_stats(user.id)
+        return user
     else:
         user = User(email=email, password_hash=generate_password_hash(password))
         db.session.add(user)
         db.session.commit()
+        
+        # Create stats for the new user
+        stats = create_user_stats(user.id)
+        
         print(type(user))
         return user
 
