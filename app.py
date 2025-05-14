@@ -11,20 +11,27 @@ from src.config.firebase_config import FirebaseConfig
 
 #  added by bilal 
 from flask_cors import CORS
+from firebase_admin import credentials, firestore, initialize_app
+from utils.db_utils_m import REMOTE_DB, FIREBASE_CREDENTIALS_PATH,FIREBASE_CONFIG
+from sqlalchemy import create_engine
 
-from utils.db_utils_m import REMOTE_DB
 
-
+def get_database():
+    if USE_FIREBASE:
+        # Initialize Firebase
+        cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
+        initialize_app(cred, FIREBASE_CONFIG)
+        return firestore.client()  # Firestore DB
+    else:
+        return create_engine(LOCAL_DB)  # SQLite DB
+    
 def create_app():
     app = Flask(__name__)
 #  added by bilal 
     
     CORS(app, origins="*", supports_credentials=True)
 
-    if USE_FIREBASE:
-        app.config["SQLALCHEMY_DATABASE_URI"] = REMOTE_DB
-    else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = LOCAL_DB
+    app.config["SQLALCHEMY_DATABASE_URI"] = get_database()
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
