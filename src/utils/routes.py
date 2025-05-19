@@ -6,8 +6,6 @@ TASK_BASE_URL=BASE_URL+"/tasks"
 LOGS_BASE_URL=BASE_URL+"/logs"
 USER_BASE_URL=BASE_URL+"/user"
 DAY_BASE_URL=BASE_URL+"/day"
-WEEK_BASE_URL=BASE_URL+"/week"
 STATS_BASE_URL=BASE_URL+"/stats"
 AUTH_BASE_URL=BASE_URL+"/auth"
-
-
+# need to add the routes for stats of the user
