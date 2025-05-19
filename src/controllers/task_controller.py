@@ -1,131 +1,99 @@
 from src.utils.db_factory import DatabaseFactory
-from src.utils.db_utils import get_active_db_type
 from src.database import db
-from  src.models import  Task
+from datetime import datetime
+from src.models.__init__ import FirebaseTask
 
+class TaskController:
+    def __init__(self):
+        self.task_model = DatabaseFactory.get_task_model()
 
-def create_task(title, category, deadline, duration, priority, sch, syn, to_sch, user):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.create(
-            title=title,
-            category=category,
-            deadline=deadline,
-            duration=duration,
-            priority=priority,
-            is_scheduled=sch,
-            is_synched=syn,
-            to_reschedule=to_sch,
-            user_email=user
-        )
-    else:
-        task = Task(
-            title=title,
-            category=category,
-            deadline=deadline,
-            duration=duration,
-            priority=priority,
-            is_scheduled=sch,
-            is_synched=syn,
-            to_reschedule=to_sch,
-            user=user
-        )
-        db.session.add(task)
-        db.session.commit()
-        return task
+    def create_task(self, title, category, deadline, duration, priority, 
+                   is_scheduled=False, is_synched=False, to_reschedule=False, 
+                   user=None, status="To Do"):
+        """Create a new task"""
+        try:
+            if isinstance(self.task_model, FirebaseTask):
+                return self.task_model.create(
+                    title=title,
+                    category=category,
+                    deadline=deadline,
+                    duration=duration,
+                    priority=priority,
+                    is_scheduled=is_scheduled,
+                    is_synched=is_synched,
+                    to_reschedule=to_reschedule,
+                    user_email=user,
+                    status=status
+                )
+            else:
+                task = self.task_model(
+                    title=title,
+                    category=category,
+                    deadline=deadline,
+                    duration=duration,
+                    priority=priority,
+                    is_scheduled=is_scheduled,
+                    is_synched=is_synched,
+                    to_reschedule=to_reschedule,
+                    user=user,
+                    status=status
+                )
+                db.session.add(task)
+                db.session.commit()
+                return task
+        except Exception as e:
+            raise ValueError(f"Could not create task: {str(e)}")
 
-def get_all_tasks():
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.query_collection()
-    else:
-        return Task.query.all()
+    def get_task_by_id(self, task_id):
+        """Get task by ID"""
+        if isinstance(self.task_model, FirebaseTask):
+            return self.task_model.get_by_id(task_id)
+        else:
+            return self.task_model.query.get(task_id)
 
-def get_task(id):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.get_by_id(id)
-    else:
-        return Task.query.filter_by(id=id).all()
+    def get_user_tasks(self, user_identifier):
+        """Get all tasks for a user"""
+        if isinstance(self.task_model, FirebaseTask):
+            return self.task_model.get_by_user(user_identifier)  # user_email
+        else:
+            return self.task_model.query.filter_by(user_id=user_identifier).all()
 
-def get_tasks_to_reschedule():
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.query_collection("to_reschedule", "==", True)
-    else:
-        return Task.query.filter_by(to_reschedule=True).all()
+    def update_task(self, task_id, data):
+        """Update task data"""
+        if isinstance(self.task_model, FirebaseTask):
+            return self.task_model.update(task_id, data)
+        else:
+            task = self.task_model.query.get(task_id)
+            if task:
+                for key, value in data.items():
+                    setattr(task, key, value)
+                db.session.commit()
+                return task
+            return None
 
-def get_tasks_to_sync():
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.query_collection("is_synched", "==", False)
-    else:
-        return Task.query.filter_by(is_synched=False).all()
+    def delete_task(self, task_id):
+        """Delete task"""
+        if isinstance(self.task_model, FirebaseTask):
+            return self.task_model.delete(task_id)
+        else:
+            task = self.task_model.query.get(task_id)
+            if task:
+                db.session.delete(task)
+                db.session.commit()
+                return True
+            return False
 
-def get_tasks_by_status(status):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.query_collection("status", "==", status)
-    else:
-        return Task.query.filter_by(status=status).all()
+    def get_tasks_by_status(self, user_identifier, status):
+        """Get tasks by status"""
+        if isinstance(self.task_model, FirebaseTask):
+            all_tasks = self.task_model.get_by_user(user_identifier)
+            return [task for task in all_tasks if task['status'] == status]
+        else:
+            return self.task_model.query.filter_by(
+                user_id=user_identifier, 
+                status=status
+            ).all()
 
-def search_tasks(query):
-    db_type = get_active_db_type()
-    
-    if not query:
-        return None
-        
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        all_tasks = task_model.query_collection()
-        return [task for task in all_tasks if 
-               query.lower() in task['title'].lower() or 
-               (task.get('category') and query.lower() in task['category'].lower())]
-    else:
-        search = f"%{query}%"
-        return Task.query.filter(
-            db.or_(
-                Task.title.ilike(search),
-                Task.category.ilike(search)
-            )
-        ).all()
-
-def update_task_status(task_id, new_status):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.update(task_id, {"status": new_status})
-    else:
-        task = Task.query.get(task_id)
-        if task:
-            task.status = new_status
-            db.session.commit()
-            return task
-        return None
-
-def delete_task(task_id):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        task_model = DatabaseFactory.get_task_model()
-        return task_model.delete(task_id)
-    else:
-        task = Task.query.get(task_id)
-        if task:
-            db.session.delete(task)
-            db.session.commit()
-            return True
-        return False
+    def update_task_status(self, task_id, new_status):
+        """Update task status"""
+        return self.update_task(task_id, {'status': new_status})

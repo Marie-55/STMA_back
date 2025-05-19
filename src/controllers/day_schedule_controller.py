@@ -1,56 +1,108 @@
 from src.utils.db_factory import DatabaseFactory
-from src.utils.db_utils import get_active_db_type
 from src.database import db
-from src.models import   DaySchedule
-import src.controllers.session_controller as sess
+from datetime import datetime
+from src.models.__init__ import FirebaseDaySchedule
 
-def create_day_schedule(date, session_ids):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        day_model = DatabaseFactory.get_day_schedule_model()
-        return day_model.create(date=date, tasks=session_ids)
-    else:
-        schedule = DaySchedule(date=date, session_ids=session_ids)
-        db.session.add(schedule)
-        db.session.commit()
-        return schedule
+class DayScheduleController:
+    def __init__(self):
+        self.day_schedule_model = DatabaseFactory.get_day_schedule_model()
+        self.session_model = DatabaseFactory.get_session_model()
 
-def add_session_to_day(date, session_id):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        day_model = DatabaseFactory.get_day_schedule_model()
-        day = day_model.get_by_date(date)
-        if day:
-            tasks = day.get('tasks', [])
-            tasks.append(session_id)
-            return day_model.update(date, {'tasks': tasks})
+    def create_schedule(self, schedule_date, user_id=None, sessions=None):
+        """Create new day schedule"""
+        try:
+            if isinstance(self.day_schedule_model, FirebaseDaySchedule):
+                return self.day_schedule_model.create(
+                    schedule_date=schedule_date,
+                    sessions=sessions or [],
+                    user_id=user_id
+                )
+            else:
+                schedule = self.day_schedule_model(
+                    date=schedule_date,
+                    user_id=user_id
+                )
+                db.session.add(schedule)
+                db.session.commit()
+                return schedule
+        except Exception as e:
+            raise ValueError(f"Could not create day schedule: {str(e)}")
+
+    def get_by_date(self, schedule_date):
+        """Get schedule by date"""
+        if isinstance(self.day_schedule_model, FirebaseDaySchedule):
+            return self.day_schedule_model.get_by_date(schedule_date)
         else:
-            return day_model.create(date=date, tasks=[session_id])
-    else:
-        schedule = DaySchedule.query.get(date)
-        if schedule:
-            schedule.session_ids.append(session_id)
-            db.session.commit()
-        else:
-            schedule = DaySchedule(date=date, session_ids=[session_id])
-            db.session.add(schedule)
-            db.session.commit()
-        return schedule
+            return self.day_schedule_model.query.get(schedule_date)
 
-def get_day_sessions(date):
-    db_type = get_active_db_type()
-    
-    if db_type == "firebase":
-        day_model = DatabaseFactory.get_day_schedule_model()
-        session_model = DatabaseFactory.get_session_model()
-        day = day_model.get_by_date(date)
-        if not day or 'tasks' not in day:
+    def get_by_date_range(self, start_date, end_date, user_id=None):
+        """Get schedules within a date range"""
+        if isinstance(self.day_schedule_model, FirebaseDaySchedule):
+            return self.day_schedule_model.get_by_date_range(
+                start_date=start_date,
+                end_date=end_date,
+                user_id=user_id
+            )
+        else:
+            query = self.day_schedule_model.query.filter(
+                self.day_schedule_model.date >= start_date,
+                self.day_schedule_model.date <= end_date
+            )
+            if user_id:
+                query = query.filter_by(user_id=user_id)
+            return query.all()
+
+    def add_session(self, schedule_date, session_id):
+        """Add session to schedule"""
+        if isinstance(self.day_schedule_model, FirebaseDaySchedule):
+            return self.day_schedule_model.add_session(schedule_date, session_id)
+        else:
+            schedule = self.get_by_date(schedule_date)
+            if schedule:
+                session = self.session_model.query.get(session_id)
+                if session:
+                    session.day_schedule_date = schedule_date
+                    db.session.commit()
+                    return schedule
             return None
-        return [session_model.get_by_id(sid) for sid in day['tasks']]
-    else:
-        schedule = DaySchedule.query.get(date)
-        if schedule:
-            return [get_session(sid)[0] for sid in schedule.session_ids]
-        return None
+
+    def remove_session(self, schedule_date, session_id):
+        """Remove session from schedule"""
+        if isinstance(self.day_schedule_model, FirebaseDaySchedule):
+            return self.day_schedule_model.remove_session(schedule_date, session_id)
+        else:
+            schedule = self.get_by_date(schedule_date)
+            if schedule:
+                session = self.session_model.query.get(session_id)
+                if session and session.day_schedule_date == schedule_date:
+                    session.day_schedule_date = None
+                    db.session.commit()
+                    return schedule
+            return None
+
+    def get_sessions(self, schedule_date):
+        """Get all sessions for a specific date"""
+        if isinstance(self.day_schedule_model, FirebaseDaySchedule):
+            schedule = self.day_schedule_model.get_by_date(schedule_date)
+            if schedule and 'sessions' in schedule:
+                return [
+                    self.session_model.get_by_id(sid) 
+                    for sid in schedule['sessions']
+                ]
+        else:
+            return self.session_model.query.filter_by(
+                day_schedule_date=schedule_date
+            ).all()
+        return []
+
+    def delete_schedule(self, schedule_date):
+        """Delete day schedule"""
+        if isinstance(self.day_schedule_model, FirebaseDaySchedule):
+            return self.day_schedule_model.delete(schedule_date)
+        else:
+            schedule = self.day_schedule_model.query.get(schedule_date)
+            if schedule:
+                db.session.delete(schedule)
+                db.session.commit()
+                return True
+            return False

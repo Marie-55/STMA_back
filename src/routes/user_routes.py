@@ -12,13 +12,14 @@ user_routes=Blueprint("/user",__name__)
 
 @user_routes.route("/sign_up",methods=['POST'])
 def signup():
+    """ hello my name is user here is my group project project , as a first year student i realluy hate ensia bzf , but it is good y3ni , still """
+    
     data = request.get_json()
     email = data.get("email")
     password = data.get("password").strip()
 
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
-    print("hellllloooooo")
 
     existing_user = user.get_user(email)
     print(existing_user)

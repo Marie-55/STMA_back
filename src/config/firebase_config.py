@@ -9,9 +9,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # FirebaseConfig class
 class FirebaseConfig:
+    # ensure that only one single instance of FirebaseConfig is created
     _instance = None
+    # ensure that Firebase connection is established only once
     _initialized = False
 
+    
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(FirebaseConfig, cls).__new__(cls)
@@ -46,7 +49,7 @@ def test_firestore_write():
     if db:
         # Add a simple test document to Firestore
         test_ref = db.collection('test_collection').document('test_document')
-        test_ref.set({'name': 'test', 'value': 123})
+        test_ref.set({'name': 'aya was here', 'value': 132})
         print("Test document added to Firestore!")
         
         # Retrieve the document to confirm it's written
@@ -69,9 +72,9 @@ def test_firebase_connection():
         print("Firebase connection failed!")
         return False
 
-# Test user creation in Firebase
-def test_user_creation():
-    """Test user creation in Firebase"""
+""" Test user creation in Firebase
+    def test_user_creation():
+    # Test user creation in Firebase
     # Assuming FirebaseUser is defined somewhere
     from src.models.firebase.user_model import FirebaseUser
     
@@ -88,11 +91,11 @@ def test_user_creation():
     user = user_model.get_by_email(email)
     print(f"Retrieved user: {user}")
     
-    return user is not None
-
+    return user is not None """
+""" 
 # Test task creation in Firebase
 def test_task_creation():
-    """Test task creation in Firebase"""
+    # Test task creation in Firebase
     # Assuming FirebaseTask is defined somewhere
     from src.models.firebase.task_model import FirebaseTask
     
@@ -135,20 +138,14 @@ def test_task_creation():
     print(f"User tasks: {user_tasks}")
     
     return task is not None
-
+"""
 if __name__ == "__main__":
     # Set environment variable for testing
     os.environ["USE_FIREBASE"] = "true"
     
     print("Testing Firebase Integration...")
     
-    if test_firebase_connection():
-        print("\nTesting User Creation...")
-        if test_user_creation():
-            print("\nTesting Task Creation...")
-            test_task_creation()
-        
-        print("\nTesting Firestore Write...")
-        test_firestore_write()  # Test writing a document to Firestore
+    print("Test firebase connection: ", test_firebase_connection())
+    print("testing firebase write", test_firestore_write()) # Test writing a document to Firestore
     
     print("\nTests completed!")

@@ -1,6 +1,24 @@
 from src.utils.firebase_repo import FirebaseRepository
 import uuid
-
+""" 
+def _create_task_table(self):
+        Create the Task table
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Task (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            category TEXT,
+            deadline TEXT,
+            duration INTEGER,
+            priority INTEGER,
+            is_scheduled BOOLEAN,
+            to_reschedule BOOLEAN,
+            is_synched BOOLEAN,
+            user_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES User(id)
+        )
+        ''')
+"""
 class FirebaseTask:
     def __init__(self):
         self.repo = FirebaseRepository()

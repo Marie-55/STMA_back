@@ -9,12 +9,12 @@ class DatabaseCreator:
     def create_tables(self):
         """Create all tables with their relationships"""
         self._create_user_table()
+        self._create_stats_table()
         self._create_task_table()
         self._create_session_table()
+        self._create_FixedSession()
         self._create_day_schedule_table()
-        self._create_stats_table()
         self._create_logs_table()
-        self._create_week_schedule_table()
         self.conn.commit()
     
     def _create_user_table(self):
@@ -23,52 +23,7 @@ class DatabaseCreator:
         CREATE TABLE IF NOT EXISTS User (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT PRIMARY KEY,
-            password4 TEXT NOT NULL,
-            stats_id INTEGER,
-            FOREIGN KEY (stats_id) REFERENCES Stats(id)
-        )
-        ''')
-    
-    def _create_task_table(self):
-        """Create the Task table"""
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Task (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            category TEXT,
-            deadline TEXT,
-            duration INTEGER,
-            priority INTEGER,
-            is_scheduled BOOLEAN,
-            to_reschedule BOOLEAN,
-            is_synched BOOLEAN,
-            user_email TEXT,
-            FOREIGN KEY (user_email) REFERENCES User(email)
-        )
-        ''')
-    
-    def _create_session_table(self):
-        """Create the Session table"""
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Session (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            duration INTEGER,
-            date TEXT,
-            start_time TEXT,
-            task_ID INTEGER,
-            day_schedule_date TEXT,
-            FOREIGN KEY (task_ID) REFERENCES Task(ID),
-            FOREIGN KEY (day_schedule_date) REFERENCES DaySchedule(date)
-        )
-        ''')
-    
-    def _create_day_schedule_table(self):
-        """Create the DaySchedule table"""
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS DaySchedule (
-            date TEXT PRIMARY KEY,
-            user_email TEXT,
-            FOREIGN KEY (user_email) REFERENCES User(email)
+            password TEXT NOT NULL
         )
         ''')
     
@@ -85,29 +40,77 @@ class DatabaseCreator:
             FOREIGN KEY (user_id) REFERENCES User(id)
         )
         ''')
+
+    def _create_task_table(self):
+        """Create the Task table"""
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Task (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            category TEXT,
+            deadline TEXT,
+            duration INTEGER,
+            priority INTEGER,
+            is_scheduled BOOLEAN,
+            to_reschedule BOOLEAN,
+            is_synched BOOLEAN,
+            user_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES User(id)
+        )
+        ''')
+    
+    def _create_session_table(self):
+        """Create the Session table"""
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Session (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            duration INTEGER,
+            date TEXT,
+            start_time TEXT,
+            
+            user_id INTEGER,
+            day_schedule_date TEXT,
+            FOREIGN KEY (user_id) REFERENCES User(id),
+            FOREIGN KEY (day_schedule_date) REFERENCES DaySchedule(date)
+        )
+        ''')
+
+    def _create_FixedSession(self):
+        """Create the FixedSession table"""
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS FixedSession (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            day_index INTEGER,
+            duration REAL,
+            start_time TEXT,
+            user_id INTEGER,
+                            
+            FOREIGN KEY (user_id) REFERENCES User(id)
+        )
+        ''')
+    
+    def _create_day_schedule_table(self):
+        """Create the DaySchedule table"""
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS DaySchedule (
+            date TEXT PRIMARY KEY,
+            user_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES User(id)
+        )
+        ''')
+    
     
     def _create_logs_table(self):
         """Create the Logs table"""
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Logs (
             date TEXT PRIMARY KEY,
-            user_email TEXT,
+            user_id INTEGER,
             login_time TEXT,
             logout_time TEXT,
             tasks_completed INTEGER DEFAULT 0,
-            FOREIGN KEY (user_email) REFERENCES User(email)
-        )
-        ''')
-    
-    def _create_week_schedule_table(self):
-        """Create the WeekSchedule table"""
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS WeekSchedule (
-            week_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            start_date TEXT,
-            end_date TEXT,
-            user_email TEXT,
-            FOREIGN KEY (user_email) REFERENCES User(email)
+            FOREIGN KEY (user_id) REFERENCES User(id)
         )
         ''')
     

@@ -1,11 +1,23 @@
 from src.database import db
-from datetime import datetime
-
+"""
+    CREATE TABLE IF NOT EXISTS Session (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        duration INTEGER,
+        date TEXT,
+        start_time TEXT,
+        
+        user_id INTEGER,
+        day_schedule_date TEXT,
+        FOREIGN KEY (user_id) REFERENCES User(id),
+        FOREIGN KEY (day_schedule_date) REFERENCES DaySchedule(date)
+    )
+"""
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     duration = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.Date, default=datetime.utcnow, nullable=False)
+    date = db.Column(db.String, nullable=False)
     start_time = db.Column(db.String, nullable=False)
-    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
-
-    task = db.relationship("Task", backref="sessions")
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    day_schedule_date = db.Column(db.String, db.ForeignKey('day_schedule.date'), nullable=False)
+    user = db.relationship('User', backref='session', lazy=True)
+    day_schedule = db.relationship('DaySchedule', backref='session', lazy=True)

@@ -1,14 +1,17 @@
 # src/utils/db_utils.py
 
 import os
-# Local Database (SQLite)
+# Local Database (SQLite) -> compatible with SQLAlchemy
 LOCAL_DB = "sqlite:///task_manager_v2.db"  
 
 # Remote Database (Firebase)
-REMOTE_DB = "firebase"
+REMOTE_DB = "https://firestore.googleapis.com/v1/projects/smart-time-management-a/databases/(default)/documents"
 
 # Use Firebase?
 USE_FIREBASE = os.getenv("USE_FIREBASE", "false").lower() == "true"
+
+# for testing purposes
+USE_FIREBASE = True
 
 def get_active_db_type():
     if USE_FIREBASE:

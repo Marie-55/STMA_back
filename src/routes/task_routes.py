@@ -1,129 +1,152 @@
 from flask import Blueprint, request, jsonify
-import src.controllers.task_controller  as tasks 
+from src.controllers.task_controller import TaskController
 from datetime import datetime
-from src.utils.util_func import model_to_dict
+from src.utils.response_helper import format_response
 
-task_routes = Blueprint("/tasks", __name__)
+task_routes = Blueprint('tasks', __name__)
+task_controller = TaskController()
 
+@task_routes.route('/create', methods=['POST'])
+def create_task():
+    """Create a new task"""
+    try:
+        data = request.json
+        if not data or not all(k in data for k in ['title', 'category', 'deadline', 'duration', 'priority']):
+            return jsonify({
+                'success': False,
+                'error': 'missing_fields',
+                'message': 'Required fields missing'
+            }), 400
 
-#writing routes
-@task_routes.route("/write/add", methods=["POST"])
-def add_task():
-    data = request.json
-    if data.get('is_scheduled'):
-        scheduled= data.get('is_scheduled')
-    else:
-        scheduled= False
-    if data.get('to_reschedule'):
-        schedule= data.get('to_reschedule')
-    else:
-        schedule= False
-    if data.get('is_synched'):
-        synched= data.get('is_synched')
-    else:
-        synched= False
-    if data.get('user'):
-        user= data.get('user')
-    else:
-        user= "test@gmail.com"
+        task = task_controller.create_task(
+            title=data['title'],
+            category=data['category'],
+            deadline=datetime.strptime(data['deadline'], "%Y-%m-%d"),
+            duration=data['duration'],
+            priority=data['priority'],
+            is_scheduled=data.get('is_scheduled', False),
+            is_synched=data.get('is_synched', False),
+            to_reschedule=data.get('to_reschedule', False),
+            user=data.get('user'),
+            status=data.get('status', 'To Do')
+        )
 
-    task = tasks.create_task(
-        data.get("title"),
-        data.get("category"),
-        datetime.strptime(data.get("deadline"), "%Y-%m-%d"),
-        data.get("duration"),
-        data.get("priority"),
-        scheduled,synched,schedule,
-        user=user
-    )
-    return jsonify({"message": "Task added successfully","task": model_to_dict(task)}), 201
-
-
-#reading
-@task_routes.route("/read/all", methods=["GET"])
-def fetch_tasks():
-    all = tasks.get_all_tasks()
-    print(all)
-    if all:
-        return jsonify({"message": "Tasks fetched", "tasks":[model_to_dict(task) for task in all]})
-    else:
-        return jsonify({"error": "Tasks not found"}), 404
-
-
-@task_routes.route("/read/to_reschedule", methods=["GET"])
-def fetch_tasks_to_reschedule():
-    to_schedule = tasks.get_tasks_to_reschedule()
-    if to_schedule:
-        return jsonify({"message": "Tasks fetched", "tasks":[model_to_dict(task) for task in to_schedule]})
-    else:
-        return jsonify({"error": "Tasks not found"}), 404
-
-@task_routes.route("/read/status/<int:status>", methods=["GET"])
-def fetch_tasks_by_status(status):
-    to_schedule = tasks.get_tasks_by_status(status=status)
-    if to_schedule:
-        return jsonify({"message": "Tasks fetched", "tasks":[model_to_dict(task) for task in to_schedule]})
-    else:
-        return jsonify({"error": "Tasks not found"}), 404
-
-
-#updating
-@task_routes.route("/update/status/<int:task_id>/<string:n_status>", methods=["PATCH"])
-def modify_task_status(task_id,n_status):
-    data = request.json
-    task = tasks.update_task_status(task_id,n_status)
-    if task:
-        return jsonify({"message": "Task updated", "task":model_to_dict(task)}), 200
-    return jsonify({"error": "Task not found"}), 404
-
-@task_routes.route("/update/title/<int:task_id>/<string:n_title>", methods=["PATCH"])
-def modify_task_title(task_id,n_title):
-    data = request.json
-    task = tasks.update_task_title(task_id,n_title)
-    if task:
-        return jsonify({"message": "Task updated", "task":model_to_dict(task)}), 200
-    return jsonify({"error": "Task not found"}), 404
-
-@task_routes.route("/update/ddl/<int:task_id>/<string:ddl>", methods=["PATCH"])
-def modify_task_deadline(task_id,ddl):
-    data = request.json
-    task = tasks.update_task_deadline(task_id,ddl)
-    if task:
-        return jsonify({"message": "Task updated", "task":model_to_dict(task)}), 200
-    return jsonify({"error": "Task not found"}), 404
-
-@task_routes.route("/update/sync/<int:task_id>/<string:syn>", methods=["PATCH"])
-def modify_task_syn(task_id,syn):
-    data = request.json
-    task = tasks.update_task_sync_status(task_id,syn)
-    if task:
-        return jsonify({"message": "Task updated", "task":model_to_dict(task)}), 200
-    return jsonify({"error": "Task not found"}), 404
-
-
-#deleting
-@task_routes.route("/delete/all", methods=["DELETE"])
-def delete_tasks():
-    data = request.json
-    task = tasks.delete_all_tasks()
-    if task:
-        return jsonify({"message": "Tasks Deleted", "tasks":model_to_dict(task)}), 200
-    return jsonify({"edrror": "No Tasks found"}), 404
-
-@task_routes.route("/delete/<int:task_id>", methods=["DELETE"])
-def delete_task(task_id):
-    data = request.json
-    task = tasks.delete_task(task_id=task_id)
-    if task:
-        return jsonify({"message": "Task Deleted", "tasks":model_to_dict(task)}), 200
-    return jsonify({"edrror": "No Tasks found"}), 404
-
-@task_routes.route("/search/<string:query>", methods=["GET"])
-def search_tasks_route(query):
-    matching_tasks = tasks.search_tasks(query)
-    if matching_tasks:
         return jsonify({
-            "message": "Tasks found",
-            "tasks": [model_to_dict(task) for task in matching_tasks]
-        })
-    return jsonify({"message": "No tasks found matching your search"}), 404
+            'success': True,
+            'message': 'Task created successfully',
+            'data': format_response(task)
+        }), 201
+
+    except ValueError as e:
+        return jsonify({
+            'success': False,
+            'error': 'invalid_data',
+            'message': str(e)
+        }), 400
+
+@task_routes.route('/user/<user_id>', methods=['GET'])
+def get_user_tasks(user_id):
+    """Get all tasks for a user"""
+    try:
+        tasks = task_controller.get_user_tasks(user_id)
+        return jsonify({
+            'success': True,
+            'data': format_response(tasks)
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
+
+@task_routes.route('/<int:task_id>', methods=['GET'])
+def get_task(task_id):
+    """Get task by ID"""
+    try:
+        task = task_controller.get_task_by_id(task_id)
+        if not task:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Task not found'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'data': format_response(task)
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
+
+@task_routes.route('/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    """Update task"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'missing_data',
+                'message': 'No data provided for update'
+            }), 400
+
+        task = task_controller.update_task(task_id, data)
+        if not task:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Task not found'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'message': 'Task updated successfully',
+            'data': format_response(task)
+        }), 200
+
+    except ValueError as e:
+        return jsonify({
+            'success': False,
+            'error': 'invalid_data',
+            'message': str(e)
+        }), 400
+
+@task_routes.route('/<int:task_id>/status', methods=['PATCH'])
+def update_task_status(task_id):
+    """Update task status"""
+    try:
+        data = request.json
+        if not data or 'status' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'missing_status',
+                'message': 'Status is required'
+            }), 400
+
+        task = task_controller.update_task_status(task_id, data['status'])
+        if not task:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Task not found'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'message': 'Task status updated successfully',
+            'data': format_response(task)
+        }), 200
+
+    except ValueError as e:
+        return jsonify({
+            'success': False,
+            'error': 'invalid_data',
+            'message': str(e)
+        }), 400
