@@ -2,7 +2,7 @@
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from src.routes import task_routes, day_routes, week_routes, log_routes, session_routes, stat_routes, user_routes, auth_routes
+from src.routes import task_routes_bp, day_schedule_bp, logs_bp, session_routes_bp, stats_routes_bp, user_routes_bp, auth_bp
 from src.services.schedule_task import schedule_blueprint
 import os
 from src.utils.db_utils import LOCAL_DB, USE_FIREBASE, REMOTE_DB
