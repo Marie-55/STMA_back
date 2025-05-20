@@ -36,15 +36,14 @@ def create_app():
 
 
     # Register all Blueprints
-    app.register_blueprint(task_routes, url_prefix='/api/tasks')
-    app.register_blueprint(day_routes, url_prefix='/api/day')
+    app.register_blueprint(task_routes_bp, url_prefix='/api/tasks')
+    app.register_blueprint(day_schedule_bp, url_prefix='/api/day')
     app.register_blueprint(schedule_blueprint, url_prefix='/api')
-    app.register_blueprint(week_routes, url_prefix='/api/week')
-    app.register_blueprint(log_routes, url_prefix='/api/logs')
-    app.register_blueprint(session_routes, url_prefix='/api/session')
-    app.register_blueprint(stat_routes, url_prefix='/api/stats')
-    app.register_blueprint(user_routes, url_prefix='/api/user')
-    app.register_blueprint(auth_routes, url_prefix='/api/auth')
+    app.register_blueprint(logs_bp, url_prefix='/api/logs')
+    app.register_blueprint(session_routes_bp, url_prefix='/api/session')
+    app.register_blueprint(stats_routes_bp, url_prefix='/api/stats')
+    app.register_blueprint(user_routes_bp, url_prefix='/api/user')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
     # Create all SQLAlchemy tables
     with app.app_context():
