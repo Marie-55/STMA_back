@@ -24,9 +24,8 @@ def create_app():
         # Initialize Firebase if enabled
         firebase = FirebaseConfig()
         firebase.initialize_app()
-    else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = LOCAL_DB
-
+    
+    app.config["SQLALCHEMY_DATABASE_URI"] = LOCAL_DB
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize SQLAlchemy with app
