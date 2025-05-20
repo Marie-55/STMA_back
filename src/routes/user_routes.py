@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-import src.controllers.user_controller  as user 
+from src.controllers.user_controller  import UserController as user 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from src.models.firebase.user_model import FirebaseUser
@@ -21,7 +21,7 @@ def signup():
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
 
-    existing_user = user.get_user(email)
+    existing_user = user.get_user_by_email(email)
     print(existing_user)
     if existing_user:
         return jsonify({"message": "User already exists"}), 409

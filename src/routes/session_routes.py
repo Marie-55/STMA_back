@@ -6,17 +6,33 @@ from src.utils.response_helper import format_response
 session_routes_bp = Blueprint('session', __name__)
 session_controller = SessionController()
 
+# """
+#     CREATE TABLE IF NOT EXISTS Session (
+#         id INTEGER PRIMARY KEY AUTOINCREMENT,
+#         duration INTEGER,
+#         date TEXT,
+#         start_time TEXT,
+        
+#         user_id INTEGER,
+#         day_schedule_date TEXT,
+#         FOREIGN KEY (user_id) REFERENCES User(id),
+#         FOREIGN KEY (day_schedule_date) REFERENCES DaySchedule(date)
+#     )
+# """
+
 @session_routes_bp.route('/create', methods=['POST'])
 def create_session():
     """Create a new session"""
     try:
         data = request.json
-        if not data or not all(k in data for k in ['date', 'start_time', 'user_id']):
+        if not data or not all(k in data for k in ['date', 'start_time', 'user_id', 'day_schedule_date', 'duration']):
             return jsonify({
                 'success': False,
                 'error': 'missing_fields',
                 'message': 'Date, start time, and user ID are required'
             }), 400
+        
+        duaration = data.get('duration')
 
         session = session_controller.create_session(
             date=data['date'],

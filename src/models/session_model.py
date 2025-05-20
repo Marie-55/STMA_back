@@ -1,17 +1,5 @@
 from src.database import db
-"""
-    CREATE TABLE IF NOT EXISTS Session (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        duration INTEGER,
-        date TEXT,
-        start_time TEXT,
-        
-        user_id INTEGER,
-        day_schedule_date TEXT,
-        FOREIGN KEY (user_id) REFERENCES User(id),
-        FOREIGN KEY (day_schedule_date) REFERENCES DaySchedule(date)
-    )
-"""
+
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     duration = db.Column(db.Integer, nullable=False)
