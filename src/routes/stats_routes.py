@@ -2,10 +2,10 @@ from flask import Blueprint, request, jsonify
 from src.controllers.stats_controller import StatsController
 from src.utils.response_helper import format_response
 
-stats_routes = Blueprint('stats', __name__)
+stats_routes_bp = Blueprint('stats', __name__)
 stats_controller = StatsController()
 
-@stats_routes.route('/user/<int:user_id>', methods=['GET'])
+@stats_routes_bp.route('/user/<int:user_id>', methods=['GET'])
 def get_stats(user_id):
     """Get user statistics"""
     try:
@@ -29,7 +29,7 @@ def get_stats(user_id):
             'message': str(e)
         }), 500
 
-@stats_routes.route('/user/<int:user_id>/task', methods=['POST'])
+@stats_routes_bp.route('/user/<int:user_id>/task', methods=['POST'])
 def update_task_stats(user_id):
     """Update task completion statistics"""
     try:
@@ -66,7 +66,7 @@ def update_task_stats(user_id):
             'message': str(e)
         }), 400
 
-@stats_routes.route('/user/<int:user_id>/productivity', methods=['GET'])
+@stats_routes_bp.route('/user/<int:user_id>/productivity', methods=['GET'])
 def calculate_productivity(user_id):
     """Calculate and get productivity score"""
     try:
@@ -90,7 +90,7 @@ def calculate_productivity(user_id):
             'message': str(e)
         }), 500
 
-@stats_routes.route('/user/<int:user_id>/duration', methods=['POST'])
+@stats_routes_bp.route('/user/<int:user_id>/duration', methods=['POST'])
 def update_duration(user_id):
     """Update average task duration"""
     try:
@@ -127,7 +127,7 @@ def update_duration(user_id):
             'message': str(e)
         }), 400
 
-@stats_routes.route('/user/<int:user_id>/create', methods=['POST'])
+@stats_routes_bp.route('/user/<int:user_id>/create', methods=['POST'])
 def create_stats(user_id):
     """Create initial stats for a new user"""
     try:

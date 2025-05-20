@@ -3,10 +3,10 @@ from src.controllers.session_controller import SessionController
 from datetime import datetime
 from src.utils.response_helper import format_response
 
-session_routes = Blueprint('session', __name__)
+session_routes_bp = Blueprint('session', __name__)
 session_controller = SessionController()
 
-@session_routes.route('/create', methods=['POST'])
+@session_routes_bp.route('/create', methods=['POST'])
 def create_session():
     """Create a new session"""
     try:
@@ -39,7 +39,7 @@ def create_session():
             'message': str(e)
         }), 400
 
-@session_routes.route('/user/<int:user_id>', methods=['GET'])
+@session_routes_bp.route('/user/<int:user_id>', methods=['GET'])
 def get_user_sessions(user_id):
     """Get all sessions for a user"""
     try:
@@ -56,7 +56,7 @@ def get_user_sessions(user_id):
             'message': str(e)
         }), 500
 
-@session_routes.route('/<int:session_id>', methods=['GET'])
+@session_routes_bp.route('/<int:session_id>', methods=['GET'])
 def get_session(session_id):
     """Get session by ID"""
     try:
@@ -80,7 +80,7 @@ def get_session(session_id):
             'message': str(e)
         }), 500
 
-@session_routes.route('/schedule/<string:date>', methods=['GET'])
+@session_routes_bp.route('/schedule/<string:date>', methods=['GET'])
 def get_schedule_sessions(date):
     """Get sessions for a specific day schedule"""
     try:
@@ -97,7 +97,7 @@ def get_schedule_sessions(date):
             'message': str(e)
         }), 500
 
-@session_routes.route('/range', methods=['GET'])
+@session_routes_bp.route('/range', methods=['GET'])
 def get_sessions_range():
     """Get sessions within a date range"""
     try:
@@ -130,7 +130,7 @@ def get_sessions_range():
             'message': str(e)
         }), 400
 
-@session_routes.route('/<int:session_id>', methods=['PUT'])
+@session_routes_bp.route('/<int:session_id>', methods=['PUT'])
 def update_session(session_id):
     """Update session"""
     try:
@@ -163,7 +163,7 @@ def update_session(session_id):
             'message': str(e)
         }), 400
 
-@session_routes.route('/<int:session_id>', methods=['DELETE'])
+@session_routes_bp.route('/<int:session_id>', methods=['DELETE'])
 def delete_session(session_id):
     """Delete session"""
     try:
@@ -187,7 +187,7 @@ def delete_session(session_id):
             'message': str(e)
         }), 500
 
-@session_routes.route('/', methods=['GET'])
+@session_routes_bp.route('/', methods=['GET'])
 def get_all_sessions():
     """Get all sessions"""
     try:

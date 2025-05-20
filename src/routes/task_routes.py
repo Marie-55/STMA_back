@@ -3,10 +3,10 @@ from src.controllers.task_controller import TaskController
 from datetime import datetime
 from src.utils.response_helper import format_response
 
-task_routes = Blueprint('tasks', __name__)
+task_routes_bp = Blueprint('tasks', __name__)
 task_controller = TaskController()
 
-@task_routes.route('/create', methods=['POST'])
+@task_routes_bp.route('/create', methods=['POST'])
 def create_task():
     """Create a new task"""
     try:
@@ -44,7 +44,7 @@ def create_task():
             'message': str(e)
         }), 400
 
-@task_routes.route('/user/<user_id>', methods=['GET'])
+@task_routes_bp.route('/user/<user_id>', methods=['GET'])
 def get_user_tasks(user_id):
     """Get all tasks for a user"""
     try:
@@ -61,7 +61,7 @@ def get_user_tasks(user_id):
             'message': str(e)
         }), 500
 
-@task_routes.route('/<int:task_id>', methods=['GET'])
+@task_routes_bp.route('/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     """Get task by ID"""
     try:
@@ -85,7 +85,7 @@ def get_task(task_id):
             'message': str(e)
         }), 500
 
-@task_routes.route('/<int:task_id>', methods=['PUT'])
+@task_routes_bp.route('/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
     """Update task"""
     try:
@@ -118,7 +118,7 @@ def update_task(task_id):
             'message': str(e)
         }), 400
 
-@task_routes.route('/<int:task_id>/status', methods=['PATCH'])
+@task_routes_bp.route('/<int:task_id>/status', methods=['PATCH'])
 def update_task_status(task_id):
     """Update task status"""
     try:

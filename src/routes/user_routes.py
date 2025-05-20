@@ -8,9 +8,9 @@ from src.utils.db_factory import DatabaseFactory
 from src.utils.util_func import model_to_dict
 
 
-user_routes=Blueprint("/user",__name__)
+user_routes_bp=Blueprint("/user",__name__)
 
-@user_routes.route("/sign_up",methods=['POST'])
+@user_routes_bp.route("/sign_up",methods=['POST'])
 def signup():
     """ hello my name is user here is my group project project , as a first year student i realluy hate ensia bzf , but it is good y3ni , still """
     
@@ -38,7 +38,7 @@ def signup():
 
 
 #auth_routes.add_url_rule('/login', view_func=login, methods=['POST'])
-@user_routes.route("/login",methods=['POST'])
+@user_routes_bp.route("/login",methods=['POST'])
 def login():
         data = request.get_json()
         email = data.get("email")
@@ -71,7 +71,7 @@ def login():
 
 
 # # Login Route
-# @user_routes.route("/login", methods=["POST"])
+# @user_routes_bp.route("/login", methods=["POST"])
 # def login_route():
 #     data = request.json
 #     log=logIn(data.get('email'), data.get('password'))
@@ -82,7 +82,7 @@ def login():
 
 
 # # Authentication Check Route
-# @user_routes.route("/check-auth", methods=["GET"])
+# @user_routes_bp.route("/check-auth", methods=["GET"])
 # def check_auth_route():
 #     check=check_user_authen()
 #     if check:
@@ -92,7 +92,7 @@ def login():
 
 
 # # Logout Route
-# @user_routes.route("/logout", methods=["POST"])
+# @user_routes_bp.route("/logout", methods=["POST"])
 # def logout_route():
 #     logout=log_out()
 #     check_user_authen
