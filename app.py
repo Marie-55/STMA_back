@@ -2,7 +2,7 @@
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from src.routes import task_routes_bp, day_schedule_bp, logs_bp, session_routes_bp, stats_routes_bp, user_routes_bp, auth_bp
+from src.routes import task_routes_bp, day_schedule_bp, logs_bp, session_routes_bp, stats_routes_bp, user_routes_bp, auth_bp, fixed_session_routes_bp
 from src.services.schedule_task import schedule_blueprint
 import os
 from src.utils.db_utils import LOCAL_DB, USE_FIREBASE, REMOTE_DB
@@ -44,6 +44,7 @@ def create_app():
     app.register_blueprint(stats_routes_bp, url_prefix='/api/stats')
     app.register_blueprint(user_routes_bp, url_prefix='/api/user')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(fixed_session_routes_bp, url_prefix='/api/fixedSession')
 
     # Create all SQLAlchemy tables
     with app.app_context():
