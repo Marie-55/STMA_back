@@ -11,6 +11,15 @@ class AuthService:
     def __init__(self):
         self.user_model = DatabaseFactory.get_user_model()
 
+    def get_user_by_email(self, email):
+        """Get user by email - adapter method"""
+        if hasattr(self.user_model, 'get_by_email'):
+            # Firebase user model
+            return self.user_model.get_by_email(email)
+        else:
+            # SQLite user model
+            return self.user_model.query.filter_by(email=email).first()
+
     def login(self, email, password):
         """Handle login for both Firebase and SQLite"""
         if not email or not password:
@@ -19,7 +28,7 @@ class AuthService:
                 "message": "Email and password are required"
             }
             
-        user = self.user_model.get_by_email(email)
+        user = self.get_user_by_email(email)
         
         if not user:
             return {
