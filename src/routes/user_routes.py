@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
-from src.controllers.user_controller  import UserController as user 
+from src.controllers.user_controller import UserController as user 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from src.models.firebase.user_model import FirebaseUser
 from src.utils.firebase_utils import verify_token
 from src.utils.db_factory import DatabaseFactory
-from src.utils.util_func import model_to_dict
+from src.utils.util_func import model_to_dict, ensure_string_id  # Add ensure_string_id import
 
 
 user_routes_bp=Blueprint("/user",__name__)
@@ -50,24 +50,13 @@ def login():
         #user_model = DatabaseFactory.get_user_model()
 
         user_ = user.get_user(email)
+        if user_ is None:
+            return {"error": "user_not_found", "message": "No account found with this email"}, 404
         
-        # Check if user exists
-        if user_==None:
-            return {"error": "user_not_found", "message": "No account found with this email"},404
+        # Convert user to dict and ensure ID is string
+        user_data = ensure_string_id(model_to_dict(user_))
         
-        # Check if password matches
-        check_pass=str(user.get_user_password(email))
-        print(f"password hash length is : {len(check_pass)}")
-        print(f"password is {password}")
-        print(f"password hash is {check_pass}")
-        print(check_password_hash(check_pass,password=password))
-        print(type(check_pass)) 
-
-        if not check_password_hash(check_pass,password=password):
-            return {"error": "invalid_password", "message": "Incorrect password"},405
-        user_=model_to_dict(user_)
-            
-        return {"success": True, "user": user_},200
+        return {"success": True, "user": user_data}, 200
 
 
 # # Login Route

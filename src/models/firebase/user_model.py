@@ -29,15 +29,21 @@ class FirebaseUser:
         return next_id
     
     def create(self, email, password_hash):
-        """Create new user"""
-        user_id = self._get_next_id()
-        user_data = {
-            "id": user_id,
-            "email": email,
-            "password_hash": password_hash
-        }
-        self.repo.add_document(self.collection, user_data, doc_id=str(user_id))
-        return user_data
+        """Create new user with hashed password"""
+        try:
+            # Use the internal method instead of repo method
+            user_id = self._get_next_id()
+            user_data = {
+                "id": str(user_id),  # Store ID as string
+                "email": email,
+                "password_hash": password_hash
+            }
+            self.repo.add_document(self.collection, user_data, str(user_id))
+            return user_data
+            
+        except Exception as e:
+            print(f"Error creating user: {str(e)}")
+            raise ValueError(f"Could not create user: {str(e)}")
 
     def get_by_email(self, email):
         """Get user by email"""

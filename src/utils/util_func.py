@@ -33,3 +33,14 @@ def model_to_dict(model_obj):
         result[column.name] = value
         
     return result
+
+def ensure_string_id(data):
+    """Ensure ID is string in dict or list of dicts"""
+    if isinstance(data, list):
+        return [ensure_string_id(item) for item in data]
+    elif isinstance(data, dict):
+        result = data.copy()
+        if 'id' in result:
+            result['id'] = str(result['id'])
+        return result
+    return data

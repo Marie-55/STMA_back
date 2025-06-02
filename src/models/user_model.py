@@ -14,7 +14,8 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def to_dict(self):
+        """Convert user to dictionary with string ID"""
         return {
-            'id': self.id,
+            'id': str(self.id),  # Convert ID to string
             'email': self.email
         }
