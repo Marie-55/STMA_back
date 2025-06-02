@@ -1,4 +1,5 @@
 from src.utils.firebase_repo import FirebaseRepository
+from werkzeug.security import generate_password_hash
 """
 CREATE TABLE IF NOT EXISTS User (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,22 +28,19 @@ class FirebaseUser:
         self.repo.update_document("counters", "users", {"next_id": next_id + 1})
         return next_id
     
-    def create(self, email, password):
-        # Check if email already exists
-        existing_user = self.get_by_email(email)
-        if existing_user:
-            raise ValueError("Email already exists")
-            
+    def create(self, email, password_hash):
+        """Create new user"""
         user_id = self._get_next_id()
         user_data = {
             "id": user_id,
             "email": email,
-            "password": password
+            "password_hash": password_hash
         }
-        return self.repo.add_document(self.collection, user_data)
-    
+        self.repo.add_document(self.collection, user_data, doc_id=str(user_id))
+        return user_data
+
     def get_by_email(self, email):
-        """Get user by email using a query"""
+        """Get user by email"""
         users = self.repo.query_collection(
             self.collection,
             field="email",
@@ -50,7 +48,7 @@ class FirebaseUser:
             value=email
         )
         return users[0] if users else None
-    
+
     def get_by_id(self, user_id):
         """Get user by ID"""
         return self.repo.get_document(self.collection, str(user_id))
