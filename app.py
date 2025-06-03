@@ -1,9 +1,7 @@
-# app.py
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from src.routes import task_routes_bp, day_schedule_bp, logs_bp, session_routes_bp, stats_routes_bp, user_routes_bp, auth_bp, fixed_session_routes_bp, rescheduling_bp
-from src.services.schedule_task import schedule_blueprint
+from src.routes import task_routes_bp, day_schedule_bp, logs_bp, session_routes_bp, stats_routes_bp, user_routes_bp, auth_bp, fixed_session_routes_bp,rescheduling_bp
+from src.services.schedule_task import scheduling_bp
 import os
 from src.utils.db_utils import LOCAL_DB, USE_FIREBASE, REMOTE_DB
 from src.database import db
@@ -35,7 +33,7 @@ def create_app():
     # Register all Blueprints
     app.register_blueprint(task_routes_bp, url_prefix='/api/tasks')
     app.register_blueprint(day_schedule_bp, url_prefix='/api/day')
-    app.register_blueprint(schedule_blueprint, url_prefix='/api')
+    app.register_blueprint(scheduling_bp, url_prefix='/api/schedule')
     app.register_blueprint(logs_bp, url_prefix='/api/logs')
     app.register_blueprint(session_routes_bp, url_prefix='/api/session')
     app.register_blueprint(stats_routes_bp, url_prefix='/api/stats')

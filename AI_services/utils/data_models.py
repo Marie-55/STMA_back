@@ -25,6 +25,8 @@ class Session:
     date: datetime.date
     start_time: time
     duration: int # in minutes
+    title: str 
+    category: str 
     end_time: time = None
     reserved:bool = False
 

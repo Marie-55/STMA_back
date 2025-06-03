@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta, time
 import random
 from typing import List, Dict, Tuple
@@ -5,11 +7,17 @@ import copy
 import json
 from AI_services.utils.data_models import Session,Task,TimeSlot,Priority
 
+# Get the project root directory (two levels up from current file)
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root))
+
 # chromosome definition    
 class Chromosome:
     """Represents a potential schedule solution"""
-    def __init__(self, sessions: List[Session] = None):
+    def __init__(self, sessions: List[Session] = []):
+        print("Creating new Chromosome")
         self.sessions = sessions or []
+        print(f"Initial sessions: {[str(session) for session in self.sessions]}")
         self.fitness = 0.0
         
     def __repr__(self):
@@ -52,42 +60,56 @@ class GeneticOperations:
     def initialize_population(tasks: List[Task], population_size: int,
                         available_slots: List[TimeSlot]) -> List[Chromosome]:
         population = []
+        print("Initializing population with random chromosomes with pop size: ", population_size)
         
         for _ in range(population_size):
+
             chromosome = Chromosome()
+             
+            print(f"Creating new chromosome with {chromosome} ")
+            print(f"task coming  ")
             shuffled_tasks = random.sample(tasks, len(tasks))
+            print(f"random shuffled tasks: {[task['id'] for task in shuffled_tasks]}")
             available_slots_copy = copy.deepcopy(available_slots)
             random.shuffle(available_slots_copy)
             
+            
             for task in shuffled_tasks:
                 scheduled = False
+                print(f"Scheduling task {task['id']} ({task['title']}) with duration {task['duration']} minutes")
                 
                 for slot in available_slots_copy:
                     if scheduled:
                         break
+                    print(f"task duration: {task['duration']}, slot: {slot.start_time} - {slot.end_time}")
                         
                     # Calculate possible duration in this slot
                     max_duration = min(
-                        task.duration ,  # Convert hours to minutes
+                        task["duration"] ,  # Convert hours to minutes
                         slot.duration_minutes()
                     )
-                    # print(f"task duration: {task.duration}, max_duration: {max_duration}")
+                    # print(f"task duration: {task["duration"]}, max_duration: {max_duration}")
                     # print(f"start time: {slot.start_time}, end time: {slot.end_time}")
                     
-                    if max_duration < task.duration :
+                    if max_duration < task["duration"] :
                         continue
                     
+                    print(f"will be scheduled in this slot")
+                    print("flot to int: ", int(task["duration"]))
                     # Create session using part of this slot
                     duration = random.randint(
-                        task.duration ,
-                        max_duration
+                        int(task["duration"]) ,
+                        int(max_duration)
                     )
                     
+                    print("creating session")
                     new_session = Session(
-                        task_id=task.id,
+                        task_id=task["id"],
                         date=slot.date,
                         start_time=slot.start_time,
-                        duration=duration 
+                        duration=duration ,
+                        title=task["title"],
+                        category=task["category"],
                     )
                     
                     # Update the remaining slot
@@ -192,24 +214,24 @@ class FitnessCalculator:
         }
         
         for session in chromosome.sessions:
-            task = next(t for t in all_tasks if t.id == session.task_id)
-            time_until_deadline = (datetime.fromisoformat(task.deadline) - current_time).total_seconds() / 60  # in minutes
-            priority_weight = priority_weights.get(task.priority, 1)
+            task = next(t for t in all_tasks if t["id"] == session.task_id)
+            time_until_deadline = (datetime.fromisoformat(task["deadline"]) - current_time).total_seconds() / 60  # in minutes
+            priority_weight = priority_weights.get(task["priority"], 1)
             deadline_score += priority_weight / (1 + max(0, time_until_deadline))
         
         # 2. Task completion (penalize for not completing tasks)
         completion_score = 0
         for task in all_tasks:
             scheduled_duration = sum(
-                s.duration for s in chromosome.sessions 
-                if s.task_id == task.id
+                s.duration for s in chromosome.sessions
+                if s.task_id == task["id"]
             )
-            completion_ratio = min(1.0, scheduled_duration / task.duration)
+            completion_ratio = min(1.0, scheduled_duration / task["duration"])
             completion_score += completion_ratio
         
         # 3. Diversity of task categories
         categories = {
-            session.task_id: next(t.category for t in all_tasks if t.id == session.task_id)
+            session.task_id: next(t["category"] for t in all_tasks if t["id"] == session.task_id)
             for session in chromosome.sessions
         }
 
@@ -233,10 +255,11 @@ class FitnessCalculator:
                     break_score -= 1
         
         # 5. Duration preferences (prefer sessions that are not too short)
+        print("Calculating duration score")
         duration_score = 0
         for session in chromosome.sessions:
-            task = next(t for t in all_tasks if t.id == session.task_id)
-            if session.duration >= task.duration :  # Prefer longer sessions
+            task = next(t for t in all_tasks if t["id"] == session.task_id)
+            if session.duration >= task["duration"] :  # Prefer longer sessions
                 duration_score += 1
         
         # Combine all scores with weights
@@ -254,6 +277,8 @@ class FitnessCalculator:
 class GeneticScheduler:
     def __init__(self, tasks: List[Task],time_slots, population_size: int = 50, 
                  mutation_rate: float = 0.1, elitism: float = 0.1):
+        
+        print("Initializing Genetic Scheduler")
         self.tasks = tasks
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -263,6 +288,8 @@ class GeneticScheduler:
         
     def run(self, generations: int = 100) -> Chromosome:
         """Run the genetic algorithm"""
+
+        print("Running Genetic Algorithm")
         population = GeneticOperations.initialize_population(
             self.tasks, 
             self.population_size,
@@ -270,6 +297,7 @@ class GeneticScheduler:
         )
         
         best_fitness_history = []
+        print(f"Starting Genetic Algorithm with {self.population_size} individuals for {generations} generations")
         
         for gen in range(generations):
             # Evaluate fitness
@@ -277,6 +305,8 @@ class GeneticScheduler:
                 chromo.fitness = FitnessCalculator.calculate(
                     chromo, self.tasks, self.current_time
                 )
+
+            print(f"Generation {gen}: Fitness scores calculated")
             
             # Sort by fitness
             population.sort(key=lambda x: x.fitness, reverse=True)
