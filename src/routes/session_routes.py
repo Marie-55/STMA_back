@@ -235,3 +235,28 @@ def delete_session_from_day_schedule(session_id, day_schedule_date):
             'error': 'server_error',
             'message': str(e)
         }), 500
+
+@session_routes_bp.route('/user/<int:user_id>/date/<string:date>', methods=['GET'])
+def get_user_schedule_sessions(user_id, date):
+    """Get sessions for a specific day schedule and user"""
+    try:
+        # First get sessions for the schedule date
+        schedule_sessions = session_controller.get_schedule_sessions(date)
+        
+        # Filter sessions for the specific user
+        user_schedule_sessions = [
+            session for session in schedule_sessions 
+            if str(session.get('user_id')) == str(user_id)
+        ]
+        
+        return jsonify({
+            'success': True,
+            'data': format_response(user_schedule_sessions)
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
