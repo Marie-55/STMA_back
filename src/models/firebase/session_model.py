@@ -19,11 +19,12 @@ class FirebaseSession:
         self.repo.update_document("counters", "sessions", {"next_id": next_id + 1})
         return next_id
 
-    def create(self, duration, date, start_time, user_id, day_schedule_date=None):
+    def create(self, title, duration, date, start_time, user_id, day_schedule_date=None):
         """Create new session with auto-incrementing ID"""
         session_id = self._get_next_id()
         session_data = {
             "id": session_id,
+            "title": title,  # Add title field
             "duration": duration,
             "date": date,
             "start_time": start_time,
@@ -49,12 +50,7 @@ class FirebaseSession:
             operator="==",
             value=day_schedule_date
         )
-
-    def get_by_date_range(self, user_id, start_date, end_date):
-        """Get sessions within a date range for a user"""
-        sessions = self.get_by_user(user_id)
-        return [s for s in sessions if start_date <= s['date'] <= end_date]
-
+    
     def get_by_id(self, session_id):
         """Get session by ID"""
         return self.repo.get_document(self.collection, str(session_id))

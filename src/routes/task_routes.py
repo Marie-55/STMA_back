@@ -18,16 +18,26 @@ def create_task():
                 'message': 'Required fields missing'
             }), 400
 
+        # Parse the ISO format datetime string
+        try:
+            deadline = datetime.strptime(data['deadline'], "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'invalid_data',
+                'message': 'Deadline must be in format YYYY-MM-DDThh:mm:ss'
+            }), 400
+
         task = task_controller.create_task(
             title=data['title'],
             category=data['category'],
-            deadline=datetime.strptime(data['deadline'], "%Y-%m-%d"),
+            deadline=deadline.strftime("%Y-%m-%dT%H:%M:%S"),  # Store in ISO format
             duration=data['duration'],
             priority=data['priority'],
             is_scheduled=data.get('is_scheduled', False),
             is_synched=data.get('is_synched', False),
             to_reschedule=data.get('to_reschedule', False),
-            user=data.get('user'),
+            user_id=data.get('user_id'),
             status=data.get('status', 'To Do')
         )
 

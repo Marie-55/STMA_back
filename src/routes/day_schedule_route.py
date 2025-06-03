@@ -115,30 +115,58 @@ def get_schedule_sessions(date):
             'message': str(e)
         }), 500
 
-@day_schedule_bp.route('/range', methods=['GET'])
-def get_schedule_range():
-    """Get schedules within a date range"""
+@day_schedule_bp.route('/remove_session', methods=['POST'])
+def remove_session():
+    """Remove a session from a schedule"""
     try:
-        start_date = request.args.get('start_date')
-        end_date = request.args.get('end_date')
-        user_id = request.args.get('user_id')
-
-        if not start_date or not end_date:
+        data = request.json
+        if not data or 'date' not in data or 'session_id' not in data:
             return jsonify({
                 'success': False,
-                'error': 'missing_dates',
-                'message': 'Start and end dates are required'
+                'error': 'missing_fields',
+                'message': 'Date and session_id are required'
             }), 400
 
-        schedules = day_schedule_controller.get_by_date_range(
-            start_date=start_date,
-            end_date=end_date,
-            user_id=user_id
+        schedule = day_schedule_controller.remove_session(
+            schedule_date=data['date'],
+            session_id=data['session_id']
         )
+        
+        if not schedule:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Schedule or session not found'
+            }), 404
 
         return jsonify({
             'success': True,
-            'data': [format_response(schedule) for schedule in schedules]
+            'message': 'Session removed successfully',
+            'data': format_response(schedule)
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
+
+@day_schedule_bp.route('/date/<string:date>', methods=['DELETE'])
+def delete_schedule(date):
+    """Delete a day schedule"""
+    try:
+        success = day_schedule_controller.delete_schedule(date)
+        if not success:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Schedule not found'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'message': 'Schedule deleted successfully'
         }), 200
 
     except Exception as e:

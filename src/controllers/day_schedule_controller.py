@@ -35,23 +35,6 @@ class DayScheduleController:
         else:
             return self.day_schedule_model.query.get(schedule_date)
 
-    def get_by_date_range(self, start_date, end_date, user_id=None):
-        """Get schedules within a date range"""
-        if isinstance(self.day_schedule_model, FirebaseDaySchedule):
-            return self.day_schedule_model.get_by_date_range(
-                start_date=start_date,
-                end_date=end_date,
-                user_id=user_id
-            )
-        else:
-            query = self.day_schedule_model.query.filter(
-                self.day_schedule_model.date >= start_date,
-                self.day_schedule_model.date <= end_date
-            )
-            if user_id:
-                query = query.filter_by(user_id=user_id)
-            return query.all()
-
     def add_session(self, schedule_date, session_id):
         """Add session to schedule"""
         if isinstance(self.day_schedule_model, FirebaseDaySchedule):

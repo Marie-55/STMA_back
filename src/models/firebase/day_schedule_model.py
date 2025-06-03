@@ -43,26 +43,6 @@ class FirebaseDaySchedule:
         date_str = self._format_date(schedule_date)
         return self.repo.get_document(self.collection, date_str)
 
-    def get_by_date_range(self, start_date, end_date, user_id=None):
-        """Get schedules within a date range"""
-        start_str = self._format_date(start_date)
-        end_str = self._format_date(end_date)
-        
-        schedules = self.repo.query_collection(
-            self.collection,
-            field="date",
-            operator=">=",
-            value=start_str
-        )
-        
-        # Filter by date range and user
-        filtered = [
-            s for s in schedules 
-            if s['date'] <= end_str and
-            (user_id is None or s.get('user_id') == user_id)
-        ]
-        return filtered
-
     def update(self, schedule_date, data):
         """Update schedule document"""
         date_str = self._format_date(schedule_date)

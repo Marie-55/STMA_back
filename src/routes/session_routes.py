@@ -25,16 +25,15 @@ def create_session():
     """Create a new session"""
     try:
         data = request.json
-        if not data or not all(k in data for k in ['date', 'start_time', 'user_id', 'day_schedule_date', 'duration']):
+        if not data or not all(k in data for k in ['title', 'date', 'start_time', 'user_id', 'day_schedule_date', 'duration']):
             return jsonify({
                 'success': False,
                 'error': 'missing_fields',
-                'message': 'Date, start time, and user ID are required'
+                'message': 'Title, date, start time, and user ID are required'
             }), 400
-        
-        duaration = data.get('duration')
 
         session = session_controller.create_session(
+            title=data['title'],
             date=data['date'],
             start_time=data['start_time'],
             user_id=data['user_id'],
@@ -59,6 +58,7 @@ def create_session():
 def get_user_sessions(user_id):
     """Get all sessions for a user"""
     try:
+        print(type(user_id))
         sessions = session_controller.get_user_sessions(user_id)
         return jsonify({
             'success': True,
@@ -112,39 +112,6 @@ def get_schedule_sessions(date):
             'error': 'server_error',
             'message': str(e)
         }), 500
-
-@session_routes_bp.route('/range', methods=['GET'])
-def get_sessions_range():
-    """Get sessions within a date range"""
-    try:
-        user_id = request.args.get('user_id')
-        start_date = request.args.get('start_date')
-        end_date = request.args.get('end_date')
-
-        if not all([user_id, start_date, end_date]):
-            return jsonify({
-                'success': False,
-                'error': 'missing_parameters',
-                'message': 'User ID, start date, and end date are required'
-            }), 400
-
-        sessions = session_controller.get_sessions_by_date_range(
-            user_id=int(user_id),
-            start_date=start_date,
-            end_date=end_date
-        )
-
-        return jsonify({
-            'success': True,
-            'data': format_response(sessions)
-        }), 200
-
-    except ValueError as e:
-        return jsonify({
-            'success': False,
-            'error': 'invalid_data',
-            'message': str(e)
-        }), 400
 
 @session_routes_bp.route('/<int:session_id>', methods=['PUT'])
 def update_session(session_id):
