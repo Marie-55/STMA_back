@@ -1,5 +1,4 @@
 from src.utils.firebase_repo import FirebaseRepository
-import uuid
 """ 
 def _create_task_table(self):
         Create the Task table
@@ -23,33 +22,44 @@ class FirebaseTask:
     def __init__(self):
         self.repo = FirebaseRepository()
         self.collection = "tasks"
-    
-    def create(self, title, category, deadline, duration, priority, 
-               is_scheduled, is_synched, to_reschedule, user_email, status="pending"):
-        task_data = {
-            "title": title,
-            "category": category,
-            "deadline": deadline,
-            "duration": duration,
-            "priority": priority,
-            "is_scheduled": is_scheduled,
-            "is_synched": is_synched,
-            "to_reschedule": to_reschedule,
-            "user_email": user_email,
-            "status": status
-        }
-        # Generate a unique ID for the task
-        task_id = str(uuid.uuid4())
-        return self.repo.add_document(self.collection, task_data, doc_id=task_id)
+
+    def create(self, task_data):
+        """Create new task with provided ID"""
+        try:
+            # Use the ID from task_data instead of generating UUID
+            task_id = task_data.get('id')
+            if not task_id:
+                raise ValueError("Task ID is required")
+                
+            self.repo.add_document(self.collection, task_data, str(task_id))
+            return task_data
+            
+        except Exception as e:
+            print(f"Error in FirebaseTask.create: {str(e)}")
+            raise
         
     def get_by_id(self, task_id):
         return self.repo.get_document(self.collection, task_id)
         
-    def get_by_user(self, user_email):
-        return self.repo.query_collection(self.collection, "user_email", "==", user_email)
+    def get_by_user(self, user_id):
+        return self.repo.query_collection(self.collection, "user_id", "==", user_id)
         
     def update(self, task_id, data):
-        return self.repo.update_document(self.collection, task_id, data)
+        """Update task with string ID"""
+        try:
+            # Ensure task_id is string
+            task_id = str(task_id)
+            
+            # Verify task exists
+            existing_task = self.get_by_id(task_id)
+            if not existing_task:
+                return None
+                
+            return self.repo.update_document(self.collection, task_id, data)
+            
+        except Exception as e:
+            print(f"Error in FirebaseTask.update: {str(e)}")
+            raise
         
     def delete(self, task_id):
         return self.repo.delete_document(self.collection, task_id)

@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+
+# Get the project root directory (two levels up from current file)
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root))
+
 import json
 from datetime import datetime, timedelta, time
 from collections import defaultdict

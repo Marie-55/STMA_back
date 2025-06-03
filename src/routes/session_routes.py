@@ -25,21 +25,21 @@ def create_session():
     """Create a new session"""
     try:
         data = request.json
-        if not data or not all(k in data for k in ['date', 'start_time', 'user_id', 'day_schedule_date', 'duration']):
+        required_fields = ['title', 'date', 'start_time', 'user_id', 'duration']
+        if not data or not all(k in data for k in required_fields):
             return jsonify({
                 'success': False,
                 'error': 'missing_fields',
-                'message': 'Date, start time, and user ID are required'
+                'message': f'Required fields: {", ".join(required_fields)}'
             }), 400
-        
-        duaration = data.get('duration')
 
         session = session_controller.create_session(
+            title=data['title'],
             date=data['date'],
             start_time=data['start_time'],
             user_id=data['user_id'],
-            duration=data.get('duration'),
-            day_schedule_date=data.get('day_schedule_date')
+            task=data.get('task_id'),  # Optional
+            duration=data['duration'],
         )
         
         return jsonify({
@@ -59,6 +59,7 @@ def create_session():
 def get_user_sessions(user_id):
     """Get all sessions for a user"""
     try:
+        print(type(user_id))
         sessions = session_controller.get_user_sessions(user_id)
         return jsonify({
             'success': True,
@@ -113,39 +114,6 @@ def get_schedule_sessions(date):
             'message': str(e)
         }), 500
 
-@session_routes_bp.route('/range', methods=['GET'])
-def get_sessions_range():
-    """Get sessions within a date range"""
-    try:
-        user_id = request.args.get('user_id')
-        start_date = request.args.get('start_date')
-        end_date = request.args.get('end_date')
-
-        if not all([user_id, start_date, end_date]):
-            return jsonify({
-                'success': False,
-                'error': 'missing_parameters',
-                'message': 'User ID, start date, and end date are required'
-            }), 400
-
-        sessions = session_controller.get_sessions_by_date_range(
-            user_id=int(user_id),
-            start_date=start_date,
-            end_date=end_date
-        )
-
-        return jsonify({
-            'success': True,
-            'data': format_response(sessions)
-        }), 200
-
-    except ValueError as e:
-        return jsonify({
-            'success': False,
-            'error': 'invalid_data',
-            'message': str(e)
-        }), 400
-
 @session_routes_bp.route('/<int:session_id>', methods=['PUT'])
 def update_session(session_id):
     """Update session"""
@@ -157,7 +125,7 @@ def update_session(session_id):
                 'error': 'missing_data',
                 'message': 'No data provided for update'
             }), 400
-
+        
         session = session_controller.update_session(session_id, data)
         if not session:
             return jsonify({
@@ -220,4 +188,50 @@ def get_all_sessions():
             'message': str(e)
         }), 500
 
+@session_routes_bp.route('/<int:session_id>/task/', methods=['GET'])
+def get_task_id(session_id):
+    """Get task ID associated with a session"""
+    try:
+        task_id = session_controller.get_task_id(session_id)
+        if task_id is None:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Session not found or no task associated'
+            }), 404
 
+        return jsonify({
+            'success': True,
+            'data': {'task_id': task_id}
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
+    
+@session_routes_bp.route('/<int:session_id>/remove_from_day_schedule/<string:day_schedule_date>', methods=['DELETE'])
+def delete_session_from_day_schedule(session_id, day_schedule_date):
+    """Delete session from a specific day schedule"""
+    try:
+        success = session_controller.delete_session_from_day_schedule(session_id, day_schedule_date)
+        if not success:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Session not found or not associated with the specified day schedule'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'message': 'Session removed from day schedule successfully'
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500

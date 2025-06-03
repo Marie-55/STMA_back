@@ -15,13 +15,16 @@ class DayAssignmentSA:
             sessions_file: Path to sessions JSON file to calculate daily capacities
             daily_slots: Pre-calculated available time slots per day (alternative to sessions_file)
         """
+        print("Initializing DayAssignmentSA with tasks and daily slots")
         self.tasks = tasks
+        print(f"Number of tasks: {len(self.tasks)}")
         self._normalize_priorities()
         self.task_map = {task['id']: task for task in self.tasks}
         
         # Convert deadlines to date objects
-        for task in self.tasks:
-            task['deadline'] = datetime.fromisoformat(task['deadline']).date()
+        # for task in self.tasks:
+        #     print(f"Processing task: {task['deadline']} with type {type(task['deadline'])}")
+        #     task['deadline'] = datetime.fromisoformat(task['deadline']).date()
         
         # Calculate daily capacities from available slots
         if daily_slots:

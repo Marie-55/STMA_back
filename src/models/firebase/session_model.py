@@ -7,30 +7,39 @@ class FirebaseSession:
         self._ensure_counter()
     
     def _ensure_counter(self):
-        """Ensure the counter document exists"""
+        """Ensure sessions counter exists"""
         counter = self.repo.get_document("counters", "sessions")
         if not counter:
             self.repo.add_document("counters", {"next_id": 1}, "sessions")
     
     def _get_next_id(self):
-        """Get and increment the next session ID"""
+        """Get next auto-increment ID"""
         counter = self.repo.get_document("counters", "sessions")
         next_id = counter.get("next_id", 1)
-        self.repo.update_document("counters", "sessions", {"next_id": next_id + 1})
-        return next_id
+        
+        # Update counter
+        self.repo.update_document("counters", "sessions", {
+            "next_id": next_id + 1
+        })
+        
+        return str(next_id)  # Return as string
 
-    def create(self, duration, date, start_time, user_id, day_schedule_date=None):
+    def create(self, title, duration, date, start_time, user_id, task_id=None, day_schedule_date=None):
         """Create new session with auto-incrementing ID"""
         session_id = self._get_next_id()
         session_data = {
             "id": session_id,
-            "duration": duration,
-            "date": date,
-            "start_time": start_time,
-            "user_id": user_id,
-            "day_schedule_date": day_schedule_date
+            "title": str(title),
+            "duration": int(duration),
+            "date": str(date),
+            "start_time": str(start_time),
+            "user_id": str(user_id),
+            "task_id": str(task_id) if task_id else None,
+            "day_schedule_date": str(day_schedule_date) if day_schedule_date else None
         }
-        return self.repo.add_document(self.collection, session_data, str(session_id))
+        
+        # Add document with explicit ID
+        return self.repo.add_document(self.collection, session_data, session_id)
 
     def get_by_user(self, user_id):
         """Get all sessions for a user"""
@@ -49,12 +58,7 @@ class FirebaseSession:
             operator="==",
             value=day_schedule_date
         )
-
-    def get_by_date_range(self, user_id, start_date, end_date):
-        """Get sessions within a date range for a user"""
-        sessions = self.get_by_user(user_id)
-        return [s for s in sessions if start_date <= s['date'] <= end_date]
-
+    
     def get_by_id(self, session_id):
         """Get session by ID"""
         return self.repo.get_document(self.collection, str(session_id))
@@ -70,3 +74,13 @@ class FirebaseSession:
     def query_collection(self):
         """Get all sessions"""
         return self.repo.query_collection(self.collection)
+
+    def remove_from_day_schedule(self, session_id, day_schedule_date):
+        """Remove session from a specific day schedule"""
+        schedule = self.repo.get_document("day_schedules", str(day_schedule_date))
+        if schedule and "sessions" in schedule:
+            sessions = schedule["sessions"]
+            if session_id in sessions:
+                sessions.remove(session_id)
+                return self.repo.update_document("day_schedules", str(day_schedule_date), {"sessions": sessions})
+        return None

@@ -1,54 +1,55 @@
-from flask import Blueprint, request, jsonify
-from src.models import Task, Session, DaySchedule
+
+from flask import Blueprint, jsonify, request
+from datetime import datetime, timedelta, date
+from AI_services.database_integrate import DatabaseScheduler  # Assuming this is in the same package
 from src.database import db
-from datetime import datetime, timedelta
+import sys
+from pathlib import Path
 
-schedule_blueprint = Blueprint('schedule', __name__)
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root))
 
-def find_least_crowded_day(before_date, required_duration):
-    """
-    Find a date before the task deadline where the session can fit.
-    """
-    days = DaySchedule.query.filter(DaySchedule.date <= before_date).all()
-    
-    # Sort days by the total scheduled hours (less crowded first)
-    days.sort(key=lambda d: sum(s.duration for s in d.sessions))
+scheduling_bp = Blueprint('scheduling', __name__, url_prefix='/api/schedule')
 
-    for day in days:
-        available_hours = 8 - sum(s.duration for s in day.sessions)  # Assume max 8 hours per day
+@scheduling_bp.route('/generate', methods=['POST'])
+def generate_schedule():
+    try:
+        data = request.get_json()
+        user_email = data.get('user_id')
         
-        if available_hours >= required_duration:
-            return day.date  # Return the first available date
+        if not user_email:
+            return jsonify({"error": "user_email is required"}), 400
 
-    return None  # No suitable day found
-
-@schedule_blueprint.route('/schedule_task', methods=['POST'])
-def schedule_task():
-    """
-    Schedule a task automatically before its deadline.
-    """
-    data = request.json
-    task_id = data.get("task_id")
-    
-    task = Task.query.get(task_id)
-    if not task:
-        return jsonify({"error": "Task not found"}), 404
-
-    # Find the best date to schedule before the deadline
-    best_date = find_least_crowded_day(task.deadline, task.duration)
-
-    if not best_date:
-        return jsonify({"error": "No available days for scheduling"}), 400
-
-    # Create a session and assign it to the best date
-    new_session = Session(
-        task_id=task.id,
-        duration=task.duration,
-        date=best_date,
-        start_time="10:00"  # Example: default start time
-    )
-
-    db.session.add(new_session)
-    db.session.commit()
-
-    return jsonify({"message": "Task scheduled successfully", "scheduled_date": best_date})
+        db_session = db.session
+        scheduler = DatabaseScheduler( user_email)
+        schedule = scheduler.run_scheduling()
+        
+        # Format response
+        formatted = []
+        for day, sessions in schedule.items():
+            day_info = {
+                "date": day.isoformat(),
+                "tasks": []
+            }
+            for session in sessions:
+                day_info["tasks"].append({
+                    "task_id": session['task_id'],
+                    "title": session.get('title', ''),
+                    "start": session['start_time'].strftime('%H:%M'),
+                    "end": (datetime.combine(day, session['start_time']) + 
+                          timedelta(minutes=session['duration'])).strftime('%H:%M'),
+                    "duration": f"{session['duration']} minutes",
+                    "category": session.get('category', '')
+                })
+            formatted.append(day_info)
+        
+        return jsonify({
+            "status": "success",
+            "schedule": formatted
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500

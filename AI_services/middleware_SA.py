@@ -4,7 +4,7 @@ from AI_services.SA_GA.VLC_GA import GeneticScheduler
 from visualization import  visualize_weekly
 from AI_services.utils.data_extract import load_schedule, get_available_slots
 from AI_services.utils.data_models import TimeSlot, Task, Priority
-from SA_week import DayAssignmentSA  # Assuming you've saved the SA implementation as SA.py
+#from SA_week import DayAssignmentSA  # Assuming you've saved the SA implementation as SA.py
 
 class SchedulingOrchestrator:
     def __init__(self, fixed_schedule, tasks: List[Task], work_hours: tuple = (9, 17)):
