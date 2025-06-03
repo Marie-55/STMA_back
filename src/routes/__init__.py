@@ -6,3 +6,4 @@ from .logs_route import logs_bp
 from .user_routes import user_routes_bp
 from .auth_routes import auth_bp
 from .fixed_session_routes import fixed_session_routes_bp
+from .rescheduling_route import rescheduling_bp

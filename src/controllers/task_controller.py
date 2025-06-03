@@ -102,6 +102,7 @@ class TaskController:
             raise ValueError(f"Could not update task: {str(e)}")
 
     def delete_task(self, task_id):
+        task_id = str(task_id)
         """Delete task"""
         if isinstance(self.task_model, FirebaseTask):
             return self.task_model.delete(task_id)
@@ -127,3 +128,25 @@ class TaskController:
     def update_task_status(self, task_id, new_status):
         """Update task status"""
         return self.update_task(task_id, {'status': new_status})
+
+    def search_tasks_by_title(self, user_id, search_term):
+        """Search tasks by title for a specific user"""
+        try:
+            if isinstance(self.task_model, FirebaseTask):
+                # Get all user tasks first
+                user_tasks = self.get_user_tasks(user_id)
+                # Filter tasks where title contains search term (case insensitive)
+                return [
+                    task for task in user_tasks 
+                    if search_term.lower() in task.get('title', '').lower()
+                ]
+            else:
+                return self.task_model.query.filter(
+                    db.and_(
+                        self.task_model.user_id == user_id,
+                        self.task_model.title.ilike(f'%{search_term}%')
+                    )
+                ).all()
+        except Exception as e:
+            print(f"Error searching tasks: {str(e)}")
+            raise ValueError(f"Could not search tasks: {str(e)}")

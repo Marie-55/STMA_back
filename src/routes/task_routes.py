@@ -160,3 +160,55 @@ def update_task_status(task_id):
             'error': 'invalid_data',
             'message': str(e)
         }), 400
+
+@task_routes_bp.route('/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    """Delete a task by ID"""
+    try:
+        success = task_controller.delete_task(task_id)
+        if not success:
+            return jsonify({
+                'success': False,
+                'error': 'not_found',
+                'message': 'Task not found'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'message': 'Task deleted successfully'
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
+
+@task_routes_bp.route('/search', methods=['GET'])
+def search_tasks():
+    """Search tasks by title"""
+    try:
+        search_term = request.args.get('q')
+        user_id = request.args.get('user_id')
+
+        if not search_term or not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'missing_parameters',
+                'message': 'Search term (q) and user_id are required'
+            }), 400
+
+        tasks = task_controller.search_tasks_by_title(user_id, search_term)
+        
+        return jsonify({
+            'success': True,
+            'data': format_response(tasks)
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
