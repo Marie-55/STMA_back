@@ -63,10 +63,39 @@ class SessionController:
 
     def get_schedule_sessions(self, day_schedule_date):
         """Get all sessions for a specific day schedule"""
-        if isinstance(self.session_model, FirebaseSession):
-            return self.session_model.get_by_day_schedule(day_schedule_date)
-        else:
-            return self.session_model.query.filter_by(day_schedule_date=day_schedule_date).all()
+        try:
+            # Use day_schedule_controller to get sessions
+            day_schedule = self.day_schedule_model.get_by_date(day_schedule_date)
+            
+            if not day_schedule:
+                print(f"No schedule found for date: {day_schedule_date}")
+                return []
+                
+            if isinstance(self.session_model, FirebaseSession):
+                # For Firebase, sessions are stored in the schedule document
+                # Use .get() with default empty list to handle None case
+                sessions = day_schedule.get('sessions', [])
+                if not sessions:
+                    print(f"No sessions found in schedule for date: {day_schedule_date}")
+                    return []
+                    
+                # Fetch complete session objects
+                session_objects = []
+                for session_id in sessions:
+                    if session_id:
+                        session = self.session_model.get_by_id(session_id)
+                        if session:
+                            session_objects.append(session)
+                return session_objects
+            else:
+                # For SQL, use the relationship
+                return self.session_model.query.filter_by(
+                    day_schedule_date=day_schedule_date
+                ).all()
+                
+        except Exception as e:
+            print(f"Error fetching schedule sessions: {str(e)}")
+            return []
 
     def update_session(self, session_id, data):
         """Update session data"""

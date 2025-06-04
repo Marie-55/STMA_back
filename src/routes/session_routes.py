@@ -242,6 +242,7 @@ def get_user_schedule_sessions(user_id, date):
     try:
         # First get sessions for the schedule date
         schedule_sessions = session_controller.get_schedule_sessions(date)
+        print (f"Schedule sessions for date {date}: {schedule_sessions}")
         
         # Filter sessions for the specific user
         user_schedule_sessions = [
