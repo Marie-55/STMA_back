@@ -212,3 +212,24 @@ def search_tasks():
             'error': 'server_error',
             'message': str(e)
         }), 500
+    
+@task_routes_bp.route('/user/<user_id>/to_reschedule', methods=['GET'])
+def get_tasks_to_reschedule(user_id):
+    """Get all tasks for a user that need rescheduling (not scheduled)"""
+    try:
+        tasks = task_controller.get_user_tasks(user_id)
+        # Filter tasks: to_reschedule is True and is_scheduled is False
+        filtered_tasks = [
+            t for t in tasks
+            if getattr(t, 'is_scheduled', False)
+        ]
+        return jsonify({
+            'success': True,
+            'data': format_response(filtered_tasks)
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'server_error',
+            'message': str(e)
+        }), 500
